@@ -1,0 +1,2494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Savings Tracker</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --primary-light: #ecfdf5;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
+            --transition: all 0.2s ease-in-out;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font);
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-align: left;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--background);
+            color: var(--text);
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-btn svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Year Selector in Sidebar */
+        .sidebar-year-section {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-year-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            padding-left: 8px;
+            font-weight: 600;
+        }
+
+        .year-selector-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .year-select {
+            flex-grow: 1;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background-color: var(--surface);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .year-select:focus {
+            border-color: var(--primary);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 1400px;
+            width: calc(100% - 280px);
+        }
+
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header Styles */
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            gap: 16px;
+        }
+
+        .view-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .view-title p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Button Framework */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            outline: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--surface);
+            border-color: var(--border);
+            color: var(--text);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--background);
+            border-color: var(--text-light);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+        }
+
+        /* KPI Metric Dashboard Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background-color: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .metric-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.85rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .metric-value.positive {
+            color: var(--primary);
+        }
+
+        .metric-subtext {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+
+        /* Section Layout Containers */
+        .dashboard-content-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .card-description {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        /* Matrix Table View Setup */
+        .matrix-scroll-container {
+            overflow-x: auto;
+            max-width: 100%;
+            position: relative;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+            min-width: 1100px;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .matrix-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-light);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .matrix-table th:first-child, .matrix-table td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: var(--surface);
+            z-index: 11;
+            font-weight: 600;
+            min-width: 140px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+        }
+
+        .matrix-table th:first-child {
+            background-color: #f8fafc;
+            z-index: 12;
+        }
+
+        .matrix-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .matrix-table tr:hover td:first-child {
+            background-color: #f1f5f9;
+        }
+
+        .matrix-cell-input {
+            width: 100%;
+            border: 1px solid transparent;
+            background: transparent;
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            text-align: right;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .matrix-cell-input:focus {
+            background-color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .matrix-cell-input::-webkit-outer-spin-button,
+        .matrix-cell-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .matrix-table .col-total {
+            font-weight: 600;
+            text-align: right;
+            background-color: #f8fafc;
+        }
+
+        .matrix-table tr.row-summary td {
+            background-color: #f1f5f9;
+            font-weight: 700;
+            border-top: 2px solid var(--border);
+        }
+
+        .matrix-table tr.row-summary td:first-child {
+            background-color: #f1f5f9;
+            z-index: 11;
+        }
+
+        /* Generic Framework Data Tables */
+        .data-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .data-table th, .data-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* Controls Area Grid Search Filters */
+        .controls-row {
+            display: flex;
+            gap: 16px;
+            padding: 24px;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input-wrapper {
+            flex-grow: 1;
+            min-width: 240px;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background-color: var(--surface);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        /* Badge Pills UI */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .badge-info { background-color: #e0f2fe; color: #0369a1; }
+        .badge-success { background-color: var(--primary-light); color: var(--primary); }
+        .badge-warning { background-color: #fef3c7; color: #b45309; }
+        .badge-danger { background-color: var(--danger-light); color: var(--danger); }
+        .badge-neutral { background-color: #f1f5f9; color: #475569; }
+
+        /* Dialog/Modal System Elements */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+            padding: 16px;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background-color: var(--surface);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 520px;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .modal-backdrop.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-light);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+        }
+
+        .modal-close:hover {
+            background-color: var(--background);
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            background-color: #f8fafc;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Form Layout Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        /* Profile Reports Panel */
+        .report-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        .member-list-card {
+            background-color: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .member-list-items {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .member-item-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .member-item-btn:last-child {
+            border-bottom: none;
+        }
+
+        .member-item-btn:hover {
+            background-color: var(--background);
+        }
+
+        .member-item-btn.active {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        .member-item-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .member-item-total {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .member-item-btn.active .member-item-name {
+            color: var(--primary-hover);
+        }
+
+        /* Audit Log List Views */
+        .log-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-item {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-timestamp {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+            white-space: nowrap;
+            width: 150px;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
+
+        .log-description {
+            font-size: 0.95rem;
+            color: var(--text);
+            flex-grow: 1;
+        }
+
+        /* Settings Grid Layouts */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 32px;
+        }
+
+        .danger-zone {
+            border-color: #fecaca;
+        }
+
+        .danger-zone .card-header {
+            background-color: #fef2f2;
+            border-bottom-color: #fecaca;
+            color: var(--danger);
+        }
+
+        /* Empty State Graphic Placeholders */
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            color: var(--border);
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        /* Mobile Utility Header Navbar */
+        .mobile-bar {
+            display: none;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 200;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text);
+            padding: 4px;
+        }
+
+        /* Responsive Breakpoint Adaptations */
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+                top: 61px;
+                height: calc(100vh - 61px);
+                width: 260px;
+                box-shadow: var(--shadow-lg);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 24px 16px;
+                margin-top: 61px;
+            }
+
+            .mobile-bar {
+                display: flex;
+            }
+
+            .report-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .view-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions .btn {
+                flex-grow: 1;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-input-wrapper {
+                width: 100%;
+            }
+            .log-item {
+                flex-direction: column;
+                gap: 4px;
+            }
+            .log-timestamp {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-bar">
+        <div class="logo-area">
+            <div class="logo-icon">F</div>
+            <div class="logo-text">Family Savings</div>
+        </div>
+        <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin='round' stroke-width='2' d='M4 6h16M4 12h16M4 18h16'/></svg>
+        </button>
+    </div>
+
+    <div class="app-container">
+        <aside class="sidebar" id="appSidebar">
+            <div class="sidebar-header">
+                <div class="logo-area">
+                    <div class="logo-icon">F</div>
+                    <div class="logo-text">Family Savings</div>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <button class="nav-btn active" data-target="dashboardView">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    Dashboard Matrix
+                </button>
+                <button class="nav-btn" data-target="expensesView">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l2-2 4 4m0-7l3 3m-3-3l-3 3M3 21h18M3 10h18M3 7l6-4 6 4 6-4v14a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/></svg>
+                    Expense System
+                </button>
+                <button class="nav-btn" data-target="membersView">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    Manage Members
+                </button>
+                <button class="nav-btn" data-target="reportsView">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Reports & History
+                </button>
+                <button class="nav-btn" data-target="logsView">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Historic Logbook
+                </button>
+                <button class="nav-btn" data-target="settingsView">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                    Global Settings
+                </button>
+            </nav>
+
+            <div class="sidebar-year-section">
+                <div class="sidebar-year-label">Active Book Year</div>
+                <div class="year-selector-wrapper">
+                    <select id="globalYearSelect" class="year-select"></select>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <section id="dashboardView" class="view-panel active">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1 id="dashTitleText">Financial Matrix Dashboard</h1>
+                        <p>Spreadsheet data matrix view of voluntary annual operations</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="manageYearsBtn">Manage Years</button>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Current Balance</div>
+                        <div class="metric-value positive" id="metricCurrentBalance">0.00</div>
+                        <div class="metric-subtext">Net across all historical records</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Year Contributions</div>
+                        <div class="metric-value" id="metricYearContributions">0.00</div>
+                        <div class="metric-subtext">Active year collective total</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Year Expenses</div>
+                        <div class="metric-value" style="color: var(--danger);" id="metricYearExpenses">0.00</div>
+                        <div class="metric-subtext">Active year outgoing cash</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Active Pool</div>
+                        <div class="metric-value" id="metricMemberCount">0</div>
+                        <div class="metric-subtext">Registered members tracking</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Contribution Spreadsheet Matrix</div>
+                            <div class="card-description">Directly edit individual cell amounts. Content auto-saves on loss of focus.</div>
+                        </div>
+                    </div>
+                    <div class="matrix-scroll-container">
+                        <table class="matrix-table" id="matrixSpreadsheetTable">
+                            </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="expensesView" class="view-panel">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Expense Management System</h1>
+                        <p>Track outgoing cash pools, dues, welfare payouts and projects</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" id="openAddExpenseModalBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Record Expense
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="controls-row">
+                        <div class="search-input-wrapper">
+                            <input type="text" id="expenseSearchInput" class="form-control" placeholder="Search operational descriptions...">
+                        </div>
+                        <div style="width: 180px;">
+                            <select id="expenseFilterCategory" class="form-control">
+                                <option value="ALL">All Categories</option>
+                                <option value="Dues">Dues</option>
+                                <option value="Welfare">Welfare</option>
+                                <option value="Funeral">Funeral</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Project">Project</option>
+                                <option value="Miscellaneous">Miscellaneous</option>
+                            </select>
+                        </div>
+                        <div style="width: 180px;">
+                            <select id="expenseSortOrder" class="form-control">
+                                <option value="DATE_DESC">Newest First</option>
+                                <option value="DATE_ASC">Oldest First</option>
+                                <option value="AMOUNT_DESC">Highest Amount</option>
+                                <option value="AMOUNT_ASC">Lowest Amount</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th style="text-align: right;">Amount</th>
+                                    <th style="text-align: right; width: 120px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="membersView" class="view-panel">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Family Member Management</h1>
+                        <p>Add, modify, or view high level metrics of registry pools</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" id="openAddMemberModalBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Add New Member
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Member Name</th>
+                                    <th style="text-align: right;">Active Year Contributions</th>
+                                    <th style="text-align: right;">Lifetime Contributions</th>
+                                    <th style="text-align: right; width: 150px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="memberTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="reportsView" class="view-panel">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Member Profiles & Statement Reports</h1>
+                        <p>Comprehensive historical overview and breakdown lists per member</p>
+                    </div>
+                </div>
+
+                <div class="report-layout">
+                    <div class="member-list-card">
+                        <div style="padding: 16px; border-bottom: 1px solid var(--border); background-color: #f8fafc; font-weight: 600; font-size: 0.85rem; color: var(--text-light); text-transform: uppercase;">
+                            Select Member Profile
+                        </div>
+                        <div class="member-list-items" id="reportMemberList">
+                            </div>
+                    </div>
+
+                    <div class="card" id="reportStatementCard">
+                        </div>
+                </div>
+            </section>
+
+            <section id="logsView" class="view-panel">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Historic System Logbook</h1>
+                        <p>Comprehensive real-time chronological operations log ledger</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="controls-row">
+                        <div class="search-input-wrapper">
+                            <input type="text" id="logSearchInput" class="form-control" placeholder="Search system audit log records...">
+                        </div>
+                    </div>
+                    <div class="log-list" id="logbookEntriesWrapper">
+                        </div>
+                </div>
+            </section>
+
+            <section id="settingsView" class="view-panel">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Global Parameters & Backup Settings</h1>
+                        <p>Maintain data compliance parameters, localized symbols, and full system databases</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Application Preferences</div>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label" for="settingsCurrencySymbol">Currency Symbol</label>
+                                <input type="text" id="settingsCurrencySymbol" class="form-control" placeholder="e.g. GH₵, $, €">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="settingsSuggestedContribution">Suggested Monthly Contribution (Informational)</label>
+                                <input type="number" id="settingsSuggestedContribution" class="form-control" min="0">
+                            </div>
+                            <div style="margin-top: 24px;">
+                                <button class="btn btn-primary" id="saveSettingsBtn" style="width: 100%;">Apply Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Database Import & Export Ledger</div>
+                        </div>
+                        <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+                            <p style="font-size: 0.9rem; color: var(--text-light)">
+                                Back up the structural datasets, member configurations, matrix logs, and operational values into a standard standalone clean JSON architecture file.
+                            </p>
+                            <button class="btn btn-secondary" id="exportDatabaseJsonBtn" style="width: 100%;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Export Database JSON
+                            </button>
+                            <hr style="border: none; border-top: 1px solid var(--border); margin: 8px 0;">
+                            <p style="font-size: 0.9rem; color: var(--text-light)">
+                                Upload a valid standard configuration layout state document object file. This will wipe any current runtime adjustments.
+                            </p>
+                            <button class="btn btn-secondary" id="triggerImportFileBtn" style="width: 100%;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Import Database JSON
+                            </button>
+                            <input type="file" id="hiddenImportFileInput" accept=".json" style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="card danger-zone">
+                        <div class="card-header">
+                            <div class="card-title">Danger Zone Destruction</div>
+                        </div>
+                        <div class="modal-body">
+                            <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 16px;">
+                                Completely drop and scrub the clean application system storage cache records back to the factory sample defaults. This removes all updates instantly.
+                            </p>
+                            <button class="btn btn-danger" id="factoryWipeDatabaseBtn" style="width: 100%;">Reset Application Database</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div class="modal-backdrop" id="yearManagerModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title">Book Year Management Control</div>
+                <button class="modal-close closeModalBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: flex-end;">
+                    <div class="form-group" style="margin-bottom: 0; flex-grow: 1;">
+                        <label class="form-label" for="newYearInputText">Create New Book Year</label>
+                        <input type="number" id="newYearInputText" class="form-control" placeholder="e.g. 2027">
+                    </div>
+                    <button class="btn btn-primary" id="createNewYearBtn">Create</button>
+                </div>
+                <hr style="border: none; border-top: 1px solid var(--border); margin: 16px 0;">
+                <label class="form-label">Configured Operational Tracking Books</label>
+                <div style="max-height: 240px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background-color: var(--background);" id="yearManagerListRows">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="expenseActionModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" id="expenseModalTitleText">Record New System Expense</div>
+                <button class="modal-close closeModalBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="expenseFormTrackingId">
+                <div class="form-group">
+                    <label class="form-label" for="expenseFormDate">Operation Date</label>
+                    <input type="date" id="expenseFormDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="expenseFormDescription">Expense Description / Purpose</label>
+                    <input type="text" id="expenseFormDescription" class="form-control" placeholder="e.g. Purchase of plastic chairs" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="expenseFormCategory">Operational Category</label>
+                    <select id="expenseFormCategory" class="form-control">
+                        <option value="Dues">Dues</option>
+                        <option value="Welfare">Welfare</option>
+                        <option value="Funeral">Funeral</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="Project">Project</option>
+                        <option value="Miscellaneous">Miscellaneous</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="expenseFormAmount">Cash Outflow Amount</label>
+                    <input type="number" id="expenseFormAmount" class="form-control" min="0" step="0.01" placeholder="0.00" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary closeModalBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveExpenseSubmitBtn">Confirm Record</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="memberActionModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" id="memberModalTitleText">Register Family Member</div>
+                <button class="modal-close closeModalBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="memberFormTrackingOriginalName">
+                <div class="form-group">
+                    <label class="form-label" for="memberFormNameInput">Full Legal/Family Name</label>
+                    <input type="text" id="memberFormNameInput" class="form-control" placeholder="e.g. Kofi Mensah" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary closeModalBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveMemberSubmitBtn">Save Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Core System Initial Datasets
+            const DEFAULT_MEMBERS = [
+                "Thelma", "Aaron", "Cecilia", "Gifty", "Prince", "Samuel", 
+                "Emmanuel", "Priscilla", "Ivy", "Doreen", "Rita", "Kelvin"
+            ];
+            
+            const DEFAULT_YEARS = ["2025", "2026"];
+            const MONTH_KEYS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            // State Storage Management Core Wrapper
+            let appState = {
+                members: [],
+                years: {},
+                activeYear: "",
+                settings: {
+                    suggestedMonthlyContribution: 100,
+                    currencySymbol: "GH₵"
+                },
+                auditLogs: []
+            };
+
+            const LOCAL_STORAGE_KEY = "FAMILY_SAVINGS_TRACKER_DB_PROD";
+
+            // Safe Database Bootloader Engine
+            function loadDatabase() {
+                try {
+                    const rawData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                    if (rawData) {
+                        const parsed = JSON.parse(rawData);
+                        if (parsed && typeof parsed === 'object') {
+                            appState.members = Array.isArray(parsed.members) ? parsed.members : [...DEFAULT_MEMBERS];
+                            appState.settings = Object.assign({ suggestedMonthlyContribution: 100, currencySymbol: "GH₵" }, parsed.settings);
+                            appState.years = (parsed.years && typeof parsed.years === 'object') ? parsed.years : {};
+                            appState.auditLogs = Array.isArray(parsed.auditLogs) ? parsed.auditLogs : [];
+                            
+                            // Ensure structural integrity of uploaded or older years database blocks
+                            Object.keys(appState.years).forEach(y => {
+                                if (!appState.years[y] || typeof appState.years[y] !== 'object') {
+                                    appState.years[y] = { contributions: {}, expenses: [] };
+                                }
+                                if (!appState.years[y].contributions) appState.years[y].contributions = {};
+                                if (!Array.isArray(appState.years[y].expenses)) appState.years[y].expenses = [];
+                            });
+
+                            // Setup active target context year frame validation
+                            if (parsed.activeYear && appState.years[parsed.activeYear]) {
+                                appState.activeYear = parsed.activeYear;
+                            } else {
+                                const yearKeys = Object.keys(appState.years);
+                                appState.activeYear = yearKeys.length > 0 ? yearKeys[0] : "";
+                            }
+                            
+                            // Self repair mechanism if data is loaded but empty state occurs
+                            if (Object.keys(appState.years).length === 0) {
+                                factoryResetToDefaults();
+                                return;
+                            }
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Critical State Load Warning: Local storage parameters corrupted. Re-indexing defaults safely.", e);
+                }
+                factoryResetToDefaults();
+            }
+
+            function saveDatabase() {
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(appState));
+                } catch (e) {
+                    console.error("Critical State Persistence Failure:", e);
+                }
+            }
+
+            function factoryResetToDefaults() {
+                appState.members = [...DEFAULT_MEMBERS];
+                appState.settings = { suggestedMonthlyContribution: 100, currencySymbol: "GH₵" };
+                appState.years = {};
+                appState.auditLogs = [];
+                
+                DEFAULT_YEARS.forEach(yr => {
+                    appState.years[yr] = {
+                        contributions: {},
+                        expenses: []
+                    };
+                });
+                
+                appState.activeYear = "2026";
+                
+                logSystemAction("System Database initialized back to standard setup schema defaults successfully.");
+                saveDatabase();
+            }
+
+            function logSystemAction(description) {
+                const now = new Date();
+                const logEntry = {
+                    timestamp: now.toISOString(),
+                    description: description
+                };
+                appState.auditLogs.unshift(logEntry); // Newest elements go to top of arrays index context
+            }
+
+            // View Management Controllers
+            function initializeViewNavigation() {
+                const navButtons = document.querySelectorAll(".nav-btn");
+                const viewPanels = document.querySelectorAll(".view-panel");
+                const sidebar = document.getElementById("appSidebar");
+
+                navButtons.forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        const targetViewId = this.getAttribute("data-target");
+                        
+                        navButtons.forEach(b => b.classList.remove("active"));
+                        viewPanels.forEach(p => p.classList.remove("active"));
+
+                        this.classList.add("active");
+                        const targetPanel = document.getElementById(targetViewId);
+                        if (targetPanel) targetPanel.classList.add("active");
+
+                        // Trigger dynamic view re-renderings on visibility transitions
+                        renderViewData(targetViewId);
+
+                        // Auto collapse mobile menus if viewport requires
+                        if (window.innerWidth <= 991) {
+                            sidebar.classList.remove("open");
+                        }
+                    });
+                });
+
+                // Mobile drawer interface toggling rules
+                document.getElementById("menuToggleBtn").addEventListener("click", function() {
+                    sidebar.classList.toggle("open");
+                });
+            }
+
+            function renderViewData(viewId) {
+                // Global active matrix layouts update automatically anyway, branch off targeted elements
+                updateGlobalMetricCounters();
+                
+                switch (viewId) {
+                    case "dashboardView":
+                        renderMatrixSpreadsheet();
+                        break;
+                    case "expensesView":
+                        renderExpenseListTable();
+                        break;
+                    case "membersView":
+                        renderMembersControlTable();
+                        break;
+                    case "reportsView":
+                        renderReportsPanelLayout();
+                        break;
+                    case "logsView":
+                        renderAuditLogbookEntries();
+                        break;
+                    case "settingsView":
+                        populateSettingsFormControls();
+                        break;
+                }
+            }
+
+            // Dynamic Formats Calculation Modules
+            function formatCurrencyValue(amount) {
+                const num = parseFloat(amount);
+                if (isNaN(num)) return `${appState.settings.currencySymbol}0.00`;
+                return `${appState.settings.currencySymbol}${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+
+            function updateGlobalMetricCounters() {
+                // Calculate historical net balance ledger data across all structured years
+                let totalAllContributions = 0;
+                let totalAllExpenses = 0;
+
+                Object.keys(appState.years).forEach(yr => {
+                    const dataBlock = appState.years[yr];
+                    // Contributions calculation
+                    if (dataBlock.contributions) {
+                        Object.keys(dataBlock.contributions).forEach(m => {
+                            Object.keys(dataBlock.contributions[m]).forEach(mn => {
+                                const val = parseFloat(dataBlock.contributions[m][mn]);
+                                if (!isNaN(val)) totalAllContributions += val;
+                            });
+                        });
+                    }
+                    // Expenses calculation
+                    if (Array.isArray(dataBlock.expenses)) {
+                        dataBlock.expenses.forEach(exp => {
+                            const val = parseFloat(exp.amount);
+                            if (!isNaN(val)) totalAllExpenses += val;
+                        });
+                    }
+                });
+
+                const currentNetBalance = totalAllContributions - totalAllExpenses;
+
+                // Active single year specific scopes
+                let currentYearContributions = 0;
+                let currentYearExpenses = 0;
+
+                const activeBlock = appState.years[appState.activeYear];
+                if (activeBlock) {
+                    if (activeBlock.contributions) {
+                        Object.keys(activeBlock.contributions).forEach(m => {
+                            Object.keys(activeBlock.contributions[m]).forEach(mn => {
+                                const val = parseFloat(activeBlock.contributions[m][mn]);
+                                if (!isNaN(val)) currentYearContributions += val;
+                            });
+                        });
+                    }
+                    if (Array.isArray(activeBlock.expenses)) {
+                        activeBlock.expenses.forEach(exp => {
+                            const val = parseFloat(exp.amount);
+                            if (!isNaN(val)) currentYearExpenses += val;
+                        });
+                    }
+                }
+
+                // Push visual strings content to target blocks elements
+                document.getElementById("metricCurrentBalance").textContent = formatCurrencyValue(currentNetBalance);
+                document.getElementById("metricYearContributions").textContent = formatCurrencyValue(currentYearContributions);
+                document.getElementById("metricYearExpenses").textContent = formatCurrencyValue(currentYearExpenses);
+                document.getElementById("metricMemberCount").textContent = appState.members.length.toString();
+                
+                const dashTitle = document.getElementById("dashTitleText");
+                if (dashTitle) {
+                    dashTitle.textContent = `Financial Matrix Dashboard (${appState.activeYear || 'None Selected'})`;
+                }
+            }
+
+            function initializeGlobalYearDropdownSelector() {
+                const selectElement = document.getElementById("globalYearSelect");
+                selectElement.innerHTML = "";
+
+                const yearKeys = Object.keys(appState.years).sort((a,b) => b - a); // Numerical reverse sorting logic order
+                yearKeys.forEach(yr => {
+                    const opt = document.createElement("option");
+                    opt.value = yr;
+                    opt.textContent = `Year Book ${yr}`;
+                    if (yr === appState.activeYear) opt.selected = true;
+                    selectElement.appendChild(opt);
+                });
+
+                selectElement.addEventListener("change", function() {
+                    appState.activeYear = this.value;
+                    saveDatabase();
+                    updateGlobalMetricCounters();
+                    // Cascade view update based on active panels selection context
+                    const activePanel = document.querySelector(".view-panel.active");
+                    if (activePanel) renderViewData(activePanel.id);
+                });
+            }
+
+            // MODAL DIALOG CONTROLLERS UTILS Framework
+            function setupModalListeners() {
+                document.querySelectorAll(".closeModalBtn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        document.querySelectorAll(".modal-backdrop").forEach(m => m.classList.remove("active"));
+                    });
+                });
+
+                // Context backdrop dismissal click handling rules boundaries
+                document.querySelectorAll(".modal-backdrop").forEach(modal => {
+                    modal.addEventListener("click", function(e) {
+                        if (e.target === this) this.classList.remove("active");
+                    });
+                });
+            }
+
+            function openModalElement(modalId) {
+                const target = document.getElementById(modalId);
+                if (target) target.classList.add("active");
+            }
+
+            function closeModalElement(modalId) {
+                const target = document.getElementById(modalId);
+                if (target) target.classList.remove("active");
+            }
+
+
+            // 1. DASHBOARD MATRIX RENDERING AND OPERATIONS LOGIC
+            function renderMatrixSpreadsheet() {
+                const table = document.getElementById("matrixSpreadsheetTable");
+                table.innerHTML = "";
+
+                if (!appState.activeYear || !appState.years[appState.activeYear]) {
+                    table.innerHTML = `<tr><td colspan="14" class="empty-state">No Active Year Frame Setup Selected. Create one first via Year Settings.</td></tr>`;
+                    return;
+                }
+
+                const activeData = appState.years[appState.activeYear];
+                if (!activeData.contributions) activeData.contributions = {};
+
+                // Generate Column Headers Frame Build
+                let theadHtml = `<thead><tr><th>Family Members</th>`;
+                MONTH_KEYS.forEach(m => { theadHtml += `<th>${m}</th>`; });
+                theadHtml += `<th style="text-align: right; background-color: #f1f5f9;">Total</th></tr></thead>`;
+                
+                // Build Rows Dynamic Grid Arrays Structures data mappings elements
+                let tbodyHtml = "<tbody>";
+                
+                // Keep tracks of monthly structures sums vertically array elements counters
+                let monthlyVerticalSums = Array(12).fill(0);
+                let absoluteYearGrandTotal = 0;
+
+                appState.members.sort().forEach(member => {
+                    if (!activeData.contributions[member]) {
+                        activeData.contributions[member] = {};
+                    }
+
+                    let memberRowTotal = 0;
+                    tbodyHtml += `<tr><td>${member}</td>`;
+
+                    MONTH_KEYS.forEach((month, idx) => {
+                        const cellVal = activeData.contributions[member][month] !== undefined ? activeData.contributions[member][month] : "";
+                        const numericalVal = parseFloat(cellVal);
+                        if (!isNaN(numericalVal)) {
+                            memberRowTotal += numericalVal;
+                            monthlyVerticalSums[idx] += numericalVal;
+                        }
+
+                        tbodyHtml += `<td>
+                            <input type="number" 
+                                   class="matrix-cell-input" 
+                                   data-member="${escapeHtmlAttribute(member)}" 
+                                   data-month="${month}" 
+                                   value="${cellVal}" 
+                                   placeholder="-" 
+                                   min="0" 
+                                   step="any">
+                        </td>`;
+                    });
+
+                    absoluteYearGrandTotal += memberRowTotal;
+                    tbodyHtml += `<br><td class="col-total" id="row-total-${safeIdSelector(member)}">${memberRowTotal.toFixed(2)}</td></tr>`;
+                });
+
+                // Generate structural summaries footer bottom total indicators bar row
+                tbodyHtml += `<tr class="row-summary"><td>Totals Sum</td>`;
+                monthlyVerticalSums.forEach(sum => {
+                    tbodyHtml += `<td style="text-align: right;">${sum.toFixed(2)}</td>`;
+                });
+                tbodyHtml += `<td style="text-align: right; background-color: #e2e8f0;">${absoluteYearGrandTotal.toFixed(2)}</td></tr>`;
+                tbodyHtml += "</tbody>";
+
+                table.innerHTML = theadHtml + tbodyHtml;
+
+                // Hook real-time event delegation updates handlers blur triggers out rules frames
+                table.querySelectorAll(".matrix-cell-input").forEach(input => {
+                    input.addEventListener("blur", function() {
+                        const targetMem = this.getAttribute("data-member");
+                        const targetMon = this.getAttribute("data-month");
+                        const rawVal = this.value.trim();
+
+                        let processedVal = "";
+                        if (rawVal !== "") {
+                            const parsed = parseFloat(rawVal);
+                            processedVal = !isNaN(parsed) && parsed >= 0 ? parsed : 0;
+                            this.value = processedVal; // Reflect cleanup input changes visually immediately 
+                        }
+
+                        // Determine deviations context adjustments logic log trackers line histories metrics
+                        const oldVal = activeData.contributions[targetMem][targetMon] !== undefined ? activeData.contributions[targetMem][targetMon] : "";
+                        if (oldVal !== processedVal) {
+                            activeData.contributions[targetMem][targetMon] = processedVal;
+                            logSystemAction(`Updated tracking entry contribution matrix line for [${targetMem}] on Month [${targetMon}] inside book year ${appState.activeYear}. Old entry: [${oldVal || 'Blank'}] rewritten to: [${processedVal || 'Blank'}].`);
+                            saveDatabase();
+                            
+                            // Re-calculate view frames dynamically elements values calculations
+                            updateGlobalMetricCounters();
+                            recalculateMatrixRowTotalsInline(targetMem);
+                            renderMatrixSpreadsheet(); // Reload spreadsheet structural state grids components to refresh summaries bars elements data
+                        }
+                    });
+                });
+            }
+
+            function recalculateMatrixRowTotalsInline(member) {
+                const activeData = appState.years[appState.activeYear];
+                if (!activeData || !activeData.contributions[member]) return;
+
+                let rowTotal = 0;
+                MONTH_KEYS.forEach(m => {
+                    const val = parseFloat(activeData.contributions[member][m]);
+                    if (!isNaN(val)) rowTotal += val;
+                });
+
+                const targetCell = document.getElementById(`row-total-${safeIdSelector(member)}`);
+                if (targetCell) targetCell.textContent = rowTotal.toFixed(2);
+            }
+
+            // Year Manager Inner Configuration Display
+            document.getElementById("manageYearsBtn").addEventListener("click", function() {
+                renderYearManagerModalRows();
+                openModalElement("yearManagerModal");
+            });
+
+            function renderYearManagerModalRows() {
+                const rowWrapper = document.getElementById("yearManagerListRows");
+                rowWrapper.innerHTML = "";
+
+                const yearsList = Object.keys(appState.years).sort((a,b) => b - a);
+                if (yearsList.length === 0) {
+                    rowWrapper.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--text-light)">No configured years set up.</div>`;
+                    return;
+                }
+
+                yearsList.forEach(yr => {
+                    const item = document.createElement("div");
+                    item.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); background-color: var(--surface);";
+                    if (item === rowWrapper.lastChild) item.style.borderBottom = "none";
+
+                    // Calculate descriptive summaries context payload counts indicators info
+                    const expenseCount = appState.years[yr].expenses ? appState.years[yr].expenses.length : 0;
+
+                    item.innerHTML = `
+                        <div>
+                            <span style="font-weight:700; font-size:1.05rem;">${yr}</span>
+                            ${yr === appState.activeYear ? '<span class="badge badge-success" style="margin-left:8px; padding:2px 6px; font-size:0.7rem;">Active</span>' : ''}
+                            <div style="font-size:0.75rem; color:var(--text-light); margin-top:2px;">${expenseCount} operational expenses recorded inside books dataset</div>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-secondary btn-sm duplicate-year-trigger" data-year="${yr}" title="Duplicate structural matrix layers setup parameters to a new year template frame">Duplicate Setup</button>
+                            <button class="btn btn-danger btn-sm delete-year-trigger" data-year="${yr}">Drop</button>
+                        </div>
+                    `;
+                    rowWrapper.appendChild(item);
+                });
+
+                // Wire click configurations inside modal scopes
+                rowWrapper.querySelectorAll(".delete-year-trigger").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        const targetYr = this.getAttribute("data-year");
+                        if (confirm(`Are you absolutely sure you want to completely delete the Book Year framework tracking for ${targetYr}?\nThis action wipes out all active historical contributions data grid metrics or expenses records entered inside this structural boundary permanently and cannot be undone.`)) {
+                            deleteYearOperationalDatasetBlock(targetYr);
+                        }
+                    });
+                });
+
+                rowWrapper.querySelectorAll(".duplicate-year-trigger").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        const srcYr = this.getAttribute("data-year");
+                        const destinationYr = prompt(`Duplicate layout settings context from ${srcYr}.\nEnter target new tracking Year destination identifier digits (e.g. 2027):`);
+                        if (destinationYr) {
+                            duplicateYearMatrixTemplateStructure(srcYr, destinationYr.trim());
+                        }
+                    });
+                });
+            }
+
+            document.getElementById("createNewYearBtn").addEventListener("click", function() {
+                const inputVal = document.getElementById("newYearInputText").value.trim();
+                if (!inputVal || isNaN(inputVal)) {
+                    alert("Please enter a valid historical or fiscal numerical year identifier string (digits).");
+                    return;
+                }
+
+                if (appState.years[inputVal]) {
+                    alert("This specific book ledger configuration year block already exists inside memory tracking pools.");
+                    return;
+                }
+
+                // Construct clean year framework configuration matrix objects
+                appState.years[inputVal] = {
+                    contributions: {},
+                    expenses: []
+                };
+
+                // Seed empty arrays entries setups matrix lines for alignment frameworks
+                appState.members.forEach(m => {
+                    appState.years[inputVal].contributions[m] = {};
+                    MONTH_KEYS.forEach(mn => { appState.years[inputVal].contributions[m][mn] = ""; });
+                });
+
+                appState.activeYear = inputVal;
+                logSystemAction(`Created a new blank operational Tracking Book Year tracking matrix for frame identifier: [${inputVal}]. Set to primary active context status profile.`);
+                saveDatabase();
+                
+                document.getElementById("newYearInputText").value = "";
+                initializeGlobalYearDropdownSelector();
+                renderYearManagerModalRows();
+                updateGlobalMetricCounters();
+                renderMatrixSpreadsheet();
+            });
+
+            function deleteYearOperationalDatasetBlock(yearId) {
+                if (!appState.years[yearId]) return;
+
+                delete appState.years[yearId];
+                logSystemAction(`Dropped and deleted full ledger record block datasets corresponding to Year: [${yearId}].`);
+
+                // Ensure running selections pointer points to safe valid active year array elements frame objects
+                const remainingKeys = Object.keys(appState.years);
+                if (appState.activeYear === yearId) {
+                    appState.activeYear = remainingKeys.length > 0 ? remainingKeys[0] : "";
+                }
+
+                saveDatabase();
+                initializeGlobalYearDropdownSelector();
+                renderYearManagerModalRows();
+                updateGlobalMetricCounters();
+                renderMatrixSpreadsheet();
+            }
+
+            function duplicateYearMatrixTemplateStructure(sourceYear, targetYear) {
+                if (!sourceYear || !targetYear || isNaN(targetYear)) {
+                    alert("Invalid entry parameters specified for cloning sequences structures templates.");
+                    return;
+                }
+
+                if (appState.years[targetYear]) {
+                    alert(`The target destination year [${targetYear}] already exists in active memory logs. Primary targets must be unallocated.`);
+                    return;
+                }
+
+                // Initialise new framework base configuration mapping architectures layout objects
+                appState.years[targetYear] = {
+                    contributions: {},
+                    expenses: []
+                };
+
+                // Extract members mappings frameworks only, seeding cell data properties values structures as completely blank defaults lines objects
+                appState.members.forEach(mem => {
+                    appState.years[targetYear].contributions[mem] = {};
+                    MONTH_KEYS.forEach(mn => {
+                        appState.years[targetYear].contributions[mem][mn] = ""; 
+                    });
+                });
+
+                appState.activeYear = targetYear;
+                logSystemAction(`Duplicated layout matrix structures profiles safely from historical Source Book Year [${sourceYear}] into target new Framework [${targetYear}]. Data content structures cleared to blanks.`);
+                saveDatabase();
+
+                initializeGlobalYearDropdownSelector();
+                renderYearManagerModalRows();
+                updateGlobalMetricCounters();
+                renderMatrixSpreadsheet();
+            }
+
+
+            // 2. EXPENSE MANAGEMENT SYSTEM APPLICATION LOGIC LAYER
+            function renderExpenseListTable() {
+                const tbody = document.getElementById("expenseTableBody");
+                tbody.innerHTML = "";
+
+                if (!appState.activeYear || !appState.years[appState.activeYear]) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No Active Year Frame Books Loaded. Create an operation book sequence first to log expenses.</td></tr>`;
+                    return;
+                }
+
+                const activeBlock = appState.years[appState.activeYear];
+                let expensesList = Array.isArray(activeBlock.expenses) ? [...activeBlock.expenses] : [];
+
+                // Filter controls extraction query evaluation passes
+                const searchQ = document.getElementById("expenseSearchInput").value.toLowerCase().trim();
+                const categoryFilter = document.getElementById("expenseFilterCategory").value;
+                const sortOrder = document.getElementById("expenseSortOrder").value;
+
+                if (searchQ) {
+                    expensesList = expensesList.filter(e => e.description.toLowerCase().includes(searchQ) || e.category.toLowerCase().includes(searchQ));
+                }
+
+                if (categoryFilter !== "ALL") {
+                    expensesList = expensesList.filter(e => e.category === categoryFilter);
+                }
+
+                // Execution ordering sort assignments metrics rules mapping parameters passes
+                expensesList.sort((a, b) => {
+                    if (sortOrder === "DATE_DESC") return new Date(b.date) - new Date(a.date);
+                    if (sortOrder === "DATE_ASC") return new Date(a.date) - new Date(b.date);
+                    if (sortOrder === "AMOUNT_DESC") return b.amount - a.amount;
+                    if (sortOrder === "AMOUNT_ASC") return a.amount - b.amount;
+                    return 0;
+                });
+
+                if (expensesList.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>No matching layout expense line items registered on this filter search target parameter.</p></td></tr>`;
+                    return;
+                }
+
+                expensesList.forEach(exp => {
+                    const tr = document.createElement("tr");
+
+                    // Categorization decorative pill badge assignments functions maps selectors
+                    let badgeClass = "badge-neutral";
+                    if (exp.category === "Welfare") badgeClass = "badge-info";
+                    if (exp.category === "Dues") badgeClass = "badge-success";
+                    if (exp.category === "Funeral") badgeClass = "badge-warning";
+                    if (exp.category === "Emergency") badgeClass = "badge-danger";
+                    if (exp.category === "Project") badgeClass = "badge-success";
+
+                    tr.innerHTML = `
+                        <td style="white-space:nowrap; font-weight:500;">${formatDateStringOutput(exp.date)}</td>
+                        <td style="font-weight:600; color:var(--text);">${escapeHtml(exp.description)}</td>
+                        <td><span class="badge ${badgeClass}">${exp.category}</span></td>
+                        <td style="text-align:right; font-weight:700; color:var(--danger);">${formatCurrencyValue(exp.amount)}</td>
+                        <td style="text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                            <button class="btn btn-secondary btn-sm edit-expense-trigger" data-id="${exp.id}" title="Edit records configuration metrics definitions">Edit</button>
+                            <button class="btn btn-danger btn-sm delete-expense-trigger" data-id="${exp.id}">Drop</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Context binding events allocation passes action engines mapping frames listeners
+                tbody.querySelectorAll(".edit-expense-trigger").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        openEditExpenseModalWindow(this.getAttribute("data-id"));
+                    });
+                });
+
+                tbody.querySelectorAll(".delete-expense-trigger").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        const targetId = this.getAttribute("data-id");
+                        if (confirm("Are you sure you want to permanently drop and wipe this expense item allocation entry from active system tracking registers records?")) {
+                            deleteExpenseTrackingEntryRow(targetId);
+                        }
+                    });
+                });
+            }
+
+            // Bind live control event filter listeners cascades changes actions
+            document.getElementById("expenseSearchInput").addEventListener("input", renderExpenseListTable);
+            document.getElementById("expenseFilterCategory").addEventListener("change", renderExpenseListTable);
+            document.getElementById("expenseSortOrder").addEventListener("change", renderExpenseListTable);
+
+            document.getElementById("openAddExpenseModalBtn").addEventListener("click", function() {
+                // Wipe form states components clear defaults inputs values metrics frameworks configuration records
+                document.getElementById("expenseFormTrackingId").value = "";
+                document.getElementById("expenseFormDate").value = new Date().toISOString().substring(0, 10);
+                document.getElementById("expenseFormDescription").value = "";
+                document.getElementById("expenseFormCategory").value = "Dues";
+                document.getElementById("expenseFormAmount").value = "";
+                
+                document.getElementById("expenseModalTitleText").textContent = "Record New System Expense Operations Line";
+                openModalElement("expenseActionModal");
+            });
+
+            function openEditExpenseModalWindow(id) {
+                const activeBlock = appState.years[appState.activeYear];
+                if (!activeBlock || !activeBlock.expenses) return;
+
+                const match = activeBlock.expenses.find(e => e.id === id);
+                if (!match) return;
+
+                document.getElementById("expenseFormTrackingId").value = match.id;
+                document.getElementById("expenseFormDate").value = match.date;
+                document.getElementById("expenseFormDescription").value = match.description;
+                document.getElementById("expenseFormCategory").value = match.category;
+                document.getElementById("expenseFormAmount").value = match.amount;
+
+                document.getElementById("expenseModalTitleText").textContent = "Modify Operational Logged Expense Allocation Parameters";
+                openModalElement("expenseActionModal");
+            }
+
+            document.getElementById("saveExpenseSubmitBtn").addEventListener("click", function() {
+                const id = document.getElementById("expenseFormTrackingId").value;
+                const dateVal = document.getElementById("expenseFormDate").value;
+                const descVal = document.getElementById("expenseFormDescription").value.trim();
+                const catVal = document.getElementById("expenseFormCategory").value;
+                const amtVal = parseFloat(document.getElementById("expenseFormAmount").value);
+
+                if (!dateVal || !descVal || isNaN(amtVal) || amtVal < 0) {
+                    alert("Please fill all data field elements using valid tracking values properties definitions parameters.");
+                    return;
+                }
+
+                const activeBlock = appState.years[appState.activeYear];
+                if (!activeBlock) return;
+                if (!Array.isArray(activeBlock.expenses)) activeBlock.expenses = [];
+
+                if (id) {
+                    // Update matching log items values metrics rows tracking profiles context indexes parameters map lines objects
+                    const index = activeBlock.expenses.findIndex(e => e.id === id);
+                    if (index !== -1) {
+                        const original = activeBlock.expenses[index];
+                        logSystemAction(`Edited operational Expense assignment tracker details inside book year ${appState.activeYear}. Original descriptor: [${original.description}, Category: ${original.category}, Sum: ${original.amount}] modified to target mappings value states metrics properties: [${descVal}, Category: ${catVal}, Sum: ${amtVal}].`);
+                        
+                        activeBlock.expenses[index] = {
+                            id: id,
+                            date: dateVal,
+                            description: descVal,
+                            category: catVal,
+                            amount: amtVal
+                        };
+                    }
+                } else {
+                    // Generate new record entries allocations elements objects sets indices arrays passes
+                    const newExpense = {
+                        id: 'exp_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36),
+                        date: dateVal,
+                        description: descVal,
+                        category: catVal,
+                        amount: amtVal
+                    };
+                    activeBlock.expenses.push(newExpense);
+                    logSystemAction(`Recorded new Outgoing System Operational Expense allocation tracking details context inside book ledger year ${appState.activeYear}: Description [${descVal}], Category Layout assignment [${catVal}], Net Cash Sum Value [${amtVal}].`);
+                }
+
+                saveDatabase();
+                closeModalElement("expenseActionModal");
+                updateGlobalMetricCounters();
+                renderExpenseListTable();
+            });
+
+            function deleteExpenseTrackingEntryRow(id) {
+                const activeBlock = appState.years[appState.activeYear];
+                if (!activeBlock || !activeBlock.expenses) return;
+
+                const match = activeBlock.expenses.find(e => e.id === id);
+                if (match) {
+                    logSystemAction(`Dropped and purged historical Operational Log Expense reference item records entry row from active registry data logs context: Desc [${match.description}], Categorization Layout [${match.category}], Sum Cost [${match.amount}] inside book mapping year ${appState.activeYear}.`);
+                }
+
+                activeBlock.expenses = activeBlock.expenses.filter(e => e.id !== id);
+                saveDatabase();
+                updateGlobalMetricCounters();
+                renderExpenseListTable();
+            }
+
+
+            // 3. MEMBER MANAGEMENT INTERFACE LOGIC COMPONENT
+            function renderMembersControlTable() {
+                const tbody = document.getElementById("memberTableBody");
+                tbody.innerHTML = "";
+
+                appState.members.sort().forEach(member => {
+                    // Calculate active year metric totals lines counts allocations maps
+                    let activeYearSum = 0;
+                    const activeBlock = appState.years[appState.activeYear];
+                    if (activeBlock && activeBlock.contributions && activeBlock.contributions[member]) {
+                        Object.keys(activeBlock.contributions[member]).forEach(m => {
+                            const val = parseFloat(activeBlock.contributions[member][m]);
+                            if (!isNaN(val)) activeYearSum += val;
+                        });
+                    }
+
+                    // Calculate lifetime historical summary across every single year matrix database parameters 
+                    let lifetimeSum = 0;
+                    Object.keys(appState.years).forEach(yr => {
+                        const yBlock = appState.years[yr];
+                        if (yBlock && yBlock.contributions && yBlock.contributions[member]) {
+                            Object.keys(yBlock.contributions[member]).forEach(m => {
+                                const val = parseFloat(yBlock.contributions[member][m]);
+                                if (!isNaN(val)) lifetimeSum += val;
+                            });
+                        }
+                    });
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td style="font-weight: 700; font-size:1.05rem; color: var(--text);">${escapeHtml(member)}</td>
+                        <td style="text-align: right; font-weight: 600; color: var(--text-light);">${formatCurrencyValue(activeYearSum)}</td>
+                        <td style="text-align: right; font-weight: 700; color: var(--primary-hover);">${formatCurrencyValue(lifetimeSum)}</td>
+                        <td style="text-align: right; display:flex; gap:6px; justify-content:flex-end;">
+                            <button class="btn btn-secondary btn-sm edit-member-trigger" data-name="${escapeHtmlAttribute(member)}" title="Rename active profile layout details settings label text">Rename</button>
+                            <button class="btn btn-danger btn-sm remove-member-trigger" data-name="${escapeHtmlAttribute(member)}">Remove</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Connect Event Hooks Actions
+                tbody.querySelectorAll(".edit-member-trigger").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        const mName = this.getAttribute("data-name");
+                        document.getElementById("memberFormTrackingOriginalName").value = mName;
+                        document.getElementById("memberFormNameInput").value = mName;
+                        document.getElementById("memberModalTitleText").textContent = "Rename Member Profile Registry Label Details";
+                        openModalElement("memberActionModal");
+                    });
+                });
+
+                tbody.querySelectorAll(".remove-member-trigger").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        const mName = this.getAttribute("data-name");
+                        if (confirm(`CRITICAL WARNING:\nAre you absolutely sure you want to completely remove family member [${mName}] from the tracking systems registry system database?\nThis operation will purge all recorded history contributions matching this identity record layout line across EVERY single configured book tracking year matrix in the system data layout permanently.`)) {
+                            removeMemberFromSystemDatabasePools(mName);
+                        }
+                    });
+                });
+            }
+
+            document.getElementById("openAddMemberModalBtn").addEventListener("click", function() {
+                document.getElementById("memberFormTrackingOriginalName").value = "";
+                document.getElementById("memberFormNameInput").value = "";
+                document.getElementById("memberModalTitleText").textContent = "Register New Member Identity Record Profile";
+                openModalElement("memberActionModal");
+            });
+
+            document.getElementById("saveMemberSubmitBtn").addEventListener("click", function() {
+                const originalName = document.getElementById("memberFormTrackingOriginalName").value.trim();
+                const inputName = document.getElementById("memberFormNameInput").value.trim();
+
+                if (!inputName) {
+                    alert("A valid name description attribute must be specified to preserve mapping indexes values structural integrity rules.");
+                    return;
+                }
+
+                if (!originalName) {
+                    // Operational Mode Sequence Action: Creating a completely new family identity matrix configuration profile
+                    if (appState.members.some(m => m.toLowerCase() === inputName.toLowerCase())) {
+                        alert("A matching profile or family registry layout identity with this name descriptor properties configuration already exists.");
+                        return;
+                    }
+
+                    appState.members.push(inputName);
+                    
+                    // Initialize empty placeholder metrics grids records layers map sets blocks instantly to prevent structural framework runtime issues loops crashes
+                    Object.keys(appState.years).forEach(yr => {
+                        if (appState.years[yr] && appState.years[yr].contributions) {
+                            appState.years[yr].contributions[inputName] = {};
+                            MONTH_KEYS.forEach(m => { appState.years[yr].contributions[inputName][m] = ""; });
+                        }
+                    });
+
+                    logSystemAction(`Registered a new member profile layout line identity to tracking system architecture: [${inputName}]. Data matrix allocation values set to defaults.`);
+                } else {
+                    // Operational Mode Sequence Action: Altering/Modifying/Renaming an established family tracking pointer configuration profiles registry map
+                    if (originalName !== inputName) {
+                        if (appState.members.some(m => m.toLowerCase() === inputName.toLowerCase() && m !== originalName)) {
+                            alert("Another separate registered member tracking record profile is already matching this identical new destination target title name label string.");
+                            return;
+                        }
+
+                        // Map update changes paths across top-level storage elements configurations structures
+                        const index = appState.members.indexOf(originalName);
+                        if (index !== -1) appState.members[index] = inputName;
+
+                        // Cascade structural adjustments variables transfers processes to secure historical tracking metrics integrity across every year
+                        Object.keys(appState.years).forEach(yr => {
+                            const yData = appState.years[yr];
+                            if (yData && yData.contributions) {
+                                if (yData.contributions[originalName]) {
+                                    yData.contributions[inputName] = yData.contributions[originalName];
+                                    delete yData.contributions[originalName];
+                                } else {
+                                    yData.contributions[inputName] = {};
+                                    MONTH_KEYS.forEach(m => { yData.contributions[inputName][m] = ""; });
+                                }
+                            }
+                        });
+
+                        logSystemAction(`Renamed tracking profile identity key values parameters inside main database array files. Original reference: [${originalName}] migrated to target properties string values: [${inputName}].`);
+                    }
+                }
+
+                saveDatabase();
+                closeModalElement("memberActionModal");
+                renderMembersControlTable();
+            });
+
+            function removeMemberFromSystemDatabasePools(memberName) {
+                appState.members = appState.members.filter(m => m !== memberName);
+
+                // Scrub structural references links parameters values rows paths completely from every tracking matrix block layer to guarantee compliance standards data cleanups 
+                Object.keys(appState.years).forEach(yr => {
+                    if (appState.years[yr] && appState.years[yr].contributions && appState.years[yr].contributions[memberName]) {
+                        delete appState.years[yr].contributions[memberName];
+                    }
+                });
+
+                logSystemAction(`Purged and dropped profile registry allocations line and all historical contribution rows values data objects for Member: [${memberName}] from active system storage files registers context properties.`);
+                saveDatabase();
+                renderMembersControlTable();
+            }
+
+
+            // 4. INDIVIDUAL MEMBERS PROFILE STATEMENT STATEMENT REPORTS GENERATOR ENGINE
+            let activelyTrackedReportMemberPointer = "";
+
+            function renderReportsPanelLayout() {
+                const listWrapper = document.getElementById("reportMemberList");
+                listWrapper.innerHTML = "";
+
+                if (appState.members.length === 0) {
+                    listWrapper.innerHTML = `<div style="padding:16px; font-size:0.9rem; text-align:center; color:var(--text-light)">No registry profile targets available.</div>`;
+                    document.getElementById("reportStatementCard").innerHTML = `<div class="empty-state">Add members parameters setup allocations fields to review compiled statement generation records files indices summaries outputs.</div>`;
+                    return;
+                }
+
+                const sortedList = [...appState.members].sort();
+                
+                // Fallback default assignments mapping checks tracking targets pointers selections profiles indices rules boundaries
+                if (!activelyTrackedReportMemberPointer || !appState.members.includes(activelyTrackedReportMemberPointer)) {
+                    activelyTrackedReportMemberPointer = sortedList[0];
+                }
+
+                sortedList.forEach(m => {
+                    // Accumulate quick summary indicators values content
+                    let activeYrSum = 0;
+                    const activeBlock = appState.years[appState.activeYear];
+                    if (activeBlock && activeBlock.contributions && activeBlock.contributions[m]) {
+                        Object.keys(activeBlock.contributions[m]).forEach(mn => {
+                            const val = parseFloat(activeBlock.contributions[m][mn]);
+                            if (!isNaN(val)) activeYrSum += val;
+                        });
+                    }
+
+                    const btn = document.createElement("button");
+                    btn.className = `member-item-btn ${m === activelyTrackedReportMemberPointer ? 'active' : ''}`;
+                    btn.innerHTML = `
+                        <span class="member-item-name">${m}</span>
+                        <span class="member-item-total">Yr: ${activeYrSum.toFixed(0)}</span>
+                    `;
+
+                    btn.addEventListener("click", function() {
+                        activelyTrackedReportMemberPointer = m;
+                        renderReportsPanelLayout(); // Refreshes styling configurations states flags highlight markers indicators bars selections rules 
+                    });
+
+                    listWrapper.appendChild(btn);
+                });
+
+                compileIndividualStatementViewContent(activelyTrackedReportMemberPointer);
+            }
+
+            function compileIndividualStatementViewContent(member) {
+                const container = document.getElementById("reportStatementCard");
+                container.innerHTML = "";
+
+                if (!member) return;
+
+                // Statistical summaries tracking metric accumulators evaluations loops
+                let activeYearTotal = 0;
+                let lifetimeTotal = 0;
+                let historicalTimelineDataLogRows = [];
+
+                // Extract and scan variables components elements through structural storage array mappings
+                Object.keys(appState.years).sort((a,b) => b - a).forEach(yr => {
+                    const yBlock = appState.years[yr];
+                    if (yBlock && yBlock.contributions && yBlock.contributions[member]) {
+                        let yearSum = 0;
+                        let monthlyBreakdownArrayPairs = [];
+
+                        MONTH_KEYS.forEach(m => {
+                            const val = parseFloat(yBlock.contributions[member][m]);
+                            const cleanVal = !isNaN(val) ? val : 0;
+                            
+                            yearSum += cleanVal;
+                            lifetimeTotal += cleanVal;
+
+                            if (cleanVal > 0) {
+                                monthlyBreakdownArrayPairs.push({ month: m, amount: cleanVal });
+                            }
+                        });
+
+                        if (yr === appState.activeYear) {
+                            activeYearTotal = yearSum;
+                        }
+
+                        historicalTimelineDataLogRows.push({
+                            year: yr,
+                            yearlySum: yearSum,
+                            breakdowns: monthlyBreakdownArrayPairs
+                        });
+                    }
+                });
+
+                // Build structural report statement display components elements inside targets container blocks cards layouts viewports
+                let reportHtml = `
+                    <div class="card-header" style="background-color: #fafafa;">
+                        <div>
+                            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--primary); letter-spacing: 0.05em;">Individual Ledger Summary Statement</div>
+                            <div class="card-title" style="font-size: 1.5rem; margin-top: 2px;">${escapeHtml(member)}</div>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+                            <div style="background-color: var(--background); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-light); text-transform: uppercase;">Active Year Matrix Total (${appState.activeYear})</div>
+                                <div style="font-size: 1.4rem; font-weight: 700; margin-top: 4px; color: var(--text);">${formatCurrencyValue(activeYearTotal)}</div>
+                            </div>
+                            <div style="background-color: var(--primary-light); padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.2);">
+                                <div style="font-size: 0.75rem; font-weight: 600; color: var(--primary-hover); text-transform: uppercase;">Lifetime Aggregate Total</div>
+                                <div style="font-size: 1.4rem; font-weight: 700; margin-top: 4px; color: var(--primary-hover);">${formatCurrencyValue(lifetimeTotal)}</div>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">Historical Annual Ledger Breakdown Timeline</h3>
+                `;
+
+                if (historicalTimelineDataLogRows.length === 0) {
+                    reportHtml += `<p style="color: var(--text-light); font-size: 0.95rem; text-align: center; padding: 24px;">No active voluntary payment history points recorded inside database configuration files for this identity profile.</p>`;
+                } else {
+                    historicalTimelineDataLogRows.forEach(row => {
+                        reportHtml += `
+                            <div style="margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;">
+                                <div style="background-color: #f8fafc; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
+                                    <span style="font-weight: 700; color: var(--text);">Year Book Matrix Reference: ${row.year}</span>
+                                    <span style="font-weight: 700; color: var(--text-light); font-size: 0.95rem;">Annual Accumulation Sum: ${formatCurrencyValue(row.yearlySum)}</span>
+                                </div>
+                                <div style="padding: 16px; background-color: white;">
+                        `;
+
+                        if (row.breakdowns.length === 0) {
+                            reportHtml += `<p style="font-size: 0.85rem; color: var(--text-light); font-style: italic;">No contribution amounts registered (Zero/Blank fields operations entries logs for this fiscal tracking period).</p>`;
+                        } else {
+                            reportHtml += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px;">`;
+                            row.breakdowns.forEach(item => {
+                                reportHtml += `
+                                    <div style="border: 1px dashed var(--border); padding: 8px 12px; border-radius: var(--radius-sm); text-align: center;">
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-light); text-transform: uppercase;">${item.month}</div>
+                                        <div style="font-size: 0.95rem; font-weight: 700; margin-top: 2px; color: var(--text);">${formatCurrencyValue(item.amount)}</div>
+                                    </div>
+                                `;
+                            });
+                            reportHtml += `</div>`;
+                        }
+
+                        reportHtml += `
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                reportHtml += `</div>`;
+                container.innerHTML = reportHtml;
+            }
+
+
+            // 5. CHRONOLOGICAL OPERATIONS HISTORIC LEDGER LOGBOOK COMPONENT ENGINE
+            function renderAuditLogbookEntries() {
+                const container = document.getElementById("logbookEntriesWrapper");
+                container.innerHTML = "";
+
+                const searchQ = document.getElementById("logSearchInput").value.toLowerCase().trim();
+                let logs = Array.isArray(appState.auditLogs) ? [...appState.auditLogs] : [];
+
+                if (searchQ) {
+                    logs = logs.filter(l => l.description.toLowerCase().includes(searchQ) || l.timestamp.includes(searchQ));
+                }
+
+                if (logs.length === 0) {
+                    container.innerHTML = `<div class="empty-state">No matching structural logging entries history tracks found matching parameters context criteria fields inputs.</div>`;
+                    return;
+                }
+
+                logs.forEach(l => {
+                    const item = document.createElement("div");
+                    item.className = "log-item";
+                    
+                    item.innerHTML = `
+                        <div class="log-timestamp">${formatTimestampToDisplayString(l.timestamp)}</div>
+                        <div class="log-description">${escapeHtml(l.description)}</div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            document.getElementById("logSearchInput").addEventListener("input", renderAuditLogbookEntries);
+
+
+            // 6. SETUP GLOBAL SETTINGS PREFERENCES CONTROLS MAPPING INTERFACES
+            function populateSettingsFormControls() {
+                document.getElementById("settingsCurrencySymbol").value = appState.settings.currencySymbol || "GH₵";
+                document.getElementById("settingsSuggestedContribution").value = appState.settings.suggestedMonthlyContribution !== undefined ? appState.settings.suggestedMonthlyContribution : 100;
+            }
+
+            document.getElementById("saveSettingsBtn").addEventListener("click", function() {
+                const sym = document.getElementById("settingsCurrencySymbol").value.trim();
+                const sug = parseFloat(document.getElementById("settingsSuggestedContribution").value);
+
+                if (!sym || isNaN(sug) || sug < 0) {
+                    alert("Please specify valid system preference parameters definitions to enforce settings boundaries.");
+                    return;
+                }
+
+                appState.settings.currencySymbol = sym;
+                appState.settings.suggestedMonthlyContribution = sug;
+                
+                logSystemAction(`Applied Global Settings updates adjustments text strings values flags: Currency set to [${sym}], Informational Suggested Contribution benchmark set to [${sug}].`);
+                saveDatabase();
+                alert("Preferences configuration parameters variables saved successfully.");
+                updateGlobalMetricCounters();
+            });
+
+            // Factory Wipe Database Control Function Call execution path
+            document.getElementById("factoryWipeDatabaseBtn").addEventListener("click", function() {
+                if (confirm("CRITICAL OPERATION WARNING:\nYou are choosing to trigger a full reset purge wipe cascade on the active local tracker cache database records storage ledger files.\nThis completely erases all current configurations settings, member indices fields mappings, contribution entries and operational expense logs tables permanently.\n\nDo you wish to completely wipe all content and start over with system defaults?")) {
+                    factoryResetToDefaults();
+                    alert("The tracking instance database tables have been wiped successfully back to basic factory defaults.");
+                    window.location.reload();
+                }
+            });
+
+            // DATA BACKUP INTEGRATION PORTABILITY EXPORT AND IMPORT LOGIC MODULES
+            document.getElementById("exportDatabaseJsonBtn").addEventListener("click", function() {
+                try {
+                    const databasePayloadStringStringified = JSON.stringify(appState, null, 2);
+                    const blob = new Blob([databasePayloadStringStringified], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const timestampStr = new Date().toISOString().substring(0, 10);
+                    const downloadAnchorElement = document.createElement("a");
+                    downloadAnchorElement.href = url;
+                    downloadAnchorElement.download = `family_savings_tracker_backup_${timestampStr}.json`;
+                    
+                    document.body.appendChild(downloadAnchorElement);
+                    downloadAnchorElement.click();
+                    document.body.removeChild(downloadAnchorElement);
+                    URL.revokeObjectURL(url);
+                    
+                    logSystemAction("Executed complete standalone JSON architectural application schema state data file export tracking backup generation request successfully.");
+                    saveDatabase(); // Commit download event logs action onto audit history tracks state data models
+                } catch (e) {
+                    alert(`Critical Backup Compilation Process Fault Trigger Exception Encountered: ${e.message}`);
+                }
+            });
+
+            // File Upload Core Trigger Intermediary Bindings Rules passes mapping bounds properties
+            const hiddenFileInputElement = document.getElementById("hiddenImportFileInput");
+            
+            document.getElementById("triggerImportFileBtn").addEventListener("click", function() {
+                hiddenFileInputElement.click();
+            });
+
+            hiddenFileInputElement.addEventListener("change", function(e) {
+                const targetedUploadDescriptorFile = e.target.files[0];
+                if (!targetedUploadDescriptorFile) return;
+
+                const fileReaderEngineInstance = new FileReader();
+                fileReaderEngineInstance.onload = function(eventEvent) {
+                    try {
+                        const parsingRawTargetStringContent = eventEvent.target.result;
+                        const verifiedJSONObjectStateOutput = JSON.parse(parsingRawTargetStringContent);
+
+                        // Rigorous Structural Sanity Analysis validation verification tracking layout checkpoints
+                        if (verifiedJSONObjectStateOutput && typeof verifiedJSONObjectStateOutput === 'object' && verifiedJSONObjectStateOutput.members && verifiedJSONObjectStateOutput.years) {
+                            
+                            // Re-assign values schema properties attributes sets
+                            appState.members = Array.isArray(verifiedJSONObjectStateOutput.members) ? verifiedJSONObjectStateOutput.members : [];
+                            appState.years = typeof verifiedJSONObjectStateOutput.years === 'object' ? verifiedJSONObjectStateOutput.years : {};
+                            appState.settings = Object.assign({ suggestedMonthlyContribution: 100, currencySymbol: "GH₵" }, verifiedJSONObjectStateOutput.settings);
+                            appState.auditLogs = Array.isArray(verifiedJSONObjectStateOutput.auditLogs) ? verifiedJSONObjectStateOutput.auditLogs : [];
+                            
+                            // Enforce mapping logic verification structural loops elements array items tracking parameters boundaries adjustments
+                            Object.keys(appState.years).forEach(yr => {
+                                if (!appState.years[yr] || typeof appState.years[yr] !== 'object') {
+                                    appState.years[yr] = { contributions: {}, expenses: [] };
+                                }
+                                if (!appState.years[yr].contributions) appState.years[yr].contributions = {};
+                                if (!Array.isArray(appState.years[yr].expenses)) appState.years[yr].expenses = [];
+                            });
+
+                            if (verifiedJSONObjectStateOutput.activeYear && appState.years[verifiedJSONObjectStateOutput.activeYear]) {
+                                appState.activeYear = verifiedJSONObjectStateOutput.activeYear;
+                            } else {
+                                const availableKeys = Object.keys(appState.years);
+                                appState.activeYear = availableKeys.length > 0 ? availableKeys[0] : "";
+                            }
+
+                            logSystemAction("Restored complete operational application runtime database logs tables and settings metrics profiles from a valid external layout backup file upload successfully.");
+                            saveDatabase();
+                            
+                            alert("Database backup file validated and successfully injected into persistent local memory pools. The tracker will now reload application views.");
+                            window.location.reload();
+                        } else {
+                            throw new Error("Missing vital structural database mappings context properties parameters schema boundaries (members/years matrices blocks arrays identifiers definitions).");
+                        }
+                    } catch (err) {
+                        alert(`Critical File Restoration Processing Error: The uploaded document target contains formatting or semantic structural failures.\n\nDetails: ${err.message}`);
+                    } finally {
+                        hiddenFileInputElement.value = ""; // Empty form target selector stream to permit tracking reuse re-uploads events transitions sequences
+                    }
+                };
+                fileReaderEngineInstance.readAsText(targetedUploadDescriptorFile);
+            });
+
+
+            // HELPER CODE UTILITY CONTEXT SANITIZATION TRIMMING FUNCTIONS
+            function escapeHtml(str) {
+                if (!str) return "";
+                return str.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function escapeHtmlAttribute(str) {
+                if (!str) return "";
+                return str.toString().replace(/"/g, "&quot;");
+            }
+
+            function safeIdSelector(str) {
+                if (!str) return "";
+                return str.toString().replace(/[^a-zA-Z0-9-_]/g, "_");
+            }
+
+            function formatDateStringOutput(dateStr) {
+                if (!dateStr) return "-";
+                try {
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3) {
+                        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                        if (!isNaN(d.getTime())) {
+                            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                        }
+                    }
+                    const alt = new Date(dateStr);
+                    if (!isNaN(alt.getTime())) return alt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    return dateStr;
+                } catch(e) {
+                    return dateStr;
+                }
+            }
+
+            function formatTimestampToDisplayString(isoTimestampString) {
+                if (!isoTimestampString) return "-";
+                try {
+                    const d = new Date(isoTimestampString);
+                    if (isNaN(d.getTime())) return isoTimestampString;
+                    
+                    const datePart = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const timePart = d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    
+                    return `${datePart} ${timePart}`;
+                } catch (e) {
+                    return isoTimestampString;
+                }
+            }
+
+            // EXECUTIONS CORES LIFECYCLE TRACKING BOOTSTRAPS SEQUENCES INITIALIZATIONS RUNNERS
+            document.addEventListener("DOMContentLoaded", function() {
+                loadDatabase();
+                initializeViewNavigation();
+                initializeGlobalYearDropdownSelector();
+                setupModalListeners();
+                
+                // Initialize default dashboard matrix layout representation instantly on app boot sequence execution path completion
+                updateGlobalMetricCounters();
+                renderMatrixSpreadsheet();
+            });
+
+        })();
+    </script>
+</body>
+</html>
